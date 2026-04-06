@@ -1,10 +1,17 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
+// src/main.jsx
+import React from "react";
+import ReactDOMClient from "react-dom/client";
+import "./main.css";
+import MyApp from "./MyApp";
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+
+// Create the container
+const container = document.getElementById("root");
+
+// Create a root
+const root = ReactDOMClient.createRoot(container);
+
+// Initial render: Render an element to the Root
+// go to the id="root" in index.html
+// means this line injects MyApp component into the root of an HTML page 
+root.render(<MyApp />);
