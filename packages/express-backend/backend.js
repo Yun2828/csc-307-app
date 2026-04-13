@@ -46,19 +46,28 @@ const findUserByName = (name) => {
         (user) => user["name"] === name
     );
 };
+
+const findUsersByNameAndJob = (name, job) => {
+  return users["users_list"].filter((user) => {
+    const matchesName = name === undefined || user["name"] === name;
+    const matchesJob = job === undefined || user["job"] === job;
+    return matchesName && matchesJob;
+  });
+};
 // API endpoint
 // accept http get request
 // '/' is the root path of the server (localhost), that will map to this endpoint
 // receive a request and send a response
 app.get("/users", (req, res) => {
-    const name = req.query.name;
-    if (name != undefined) {
-        let result = findUserByName(name);
-        result = { users_list: result };
-        res.send(result);
-} else {
+  const name = req.query.name;
+  const job = req.query.job;
+
+  if (name !== undefined || job !== undefined) {
+    const result = findUsersByNameAndJob(name, job);
+    res.send({ users_list: result });
+  } else {
     res.send(users);
-}
+  }
 });
 
 const findUserById = (id) =>
@@ -83,6 +92,28 @@ app.post("/users", (req, res) => {
   const userToAdd = req.body;
   addUser(userToAdd);
   res.send();
+});
+
+const removeUserById = (id) => {
+  const index = users["users_list"].findIndex((user) => user["id"] === id);
+
+  if (index === -1) {
+    return undefined;
+  }
+
+  const deletedUser = users["users_list"][index];
+  users["users_list"].splice(index, 1);
+  return deletedUser;
+};
+
+app.delete("/users/:id", (req, res) => {
+  const id = req.params["id"];
+  const deletedUser = removeUserById(id);
+  if (deletedUser === undefined) {
+    res.status(404).send("Resource not found.");
+  } else {
+    res.send(deletedUser);
+  }
 });
 
 app.listen(port, () => {
