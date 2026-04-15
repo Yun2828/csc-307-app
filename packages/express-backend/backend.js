@@ -85,15 +85,24 @@ app.get("/users/:id", (req, res) => {
   }
 });
 
+const generateId = () => {
+  return Math.random().toString(36).substring(2, 9);
+};
+
 const addUser = (user) => {
-  users["users_list"].push(user);
-  return user;
+  const userWithId = {
+    id: generateId(),
+    ...user,
+  };
+
+  users["users_list"].push(userWithId);
+  return userWithId;
 };
 
 app.post("/users", (req, res) => {
   const userToAdd = req.body;
-  addUser(userToAdd);
-  res.send();
+  const addedUser = addUser(userToAdd);
+  res.status(201).send(addedUser);
 });
 
 const removeUserById = (id) => {

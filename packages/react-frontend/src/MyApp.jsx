@@ -18,34 +18,42 @@ function MyApp() {
     function updateList(person){
         setCharacters([...characters, person]);
     }
-    function postUser(person) {
-      const promise = fetch("Http://localhost:8000/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(person),
+  function postUser(person) {
+    return fetch("http://localhost:8000/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(person),
     });
+  }
 
-      return promise;
-    }
-    function updateList(person) { 
-      postUser(person)
-        .then(() => setCharacters([...characters, person]))
-        .catch((error) => {
-          console.log(error);
-        })
-    }
-    function fetchUsers() {
-      const promise = fetch("http://localhost:8000/users");
-      return promise;
-    }
-    useEffect(() => {
+  function updateList(person) {
+    postUser(person)
+      .then((res) => {
+        if (res.status === 201) {
+          return res.json();
+        } else {
+          throw new Error("User was not created");
+        }
+      })
+      .then((newUser) => {
+        setCharacters([...characters, newUser]);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+  function fetchUsers() {
+    const promise = fetch("http://localhost:8000/users");
+    return promise;
+  }
+  useEffect(() => {
       fetchUsers()
         .then((res) => res.json())
         .then((json) => setCharacters(json["users_list"]))
         .catch((error) => { console.log(error); });
-    }, [] );
+  }, [] );
   return (
     <div className="container">
       <Table characterData={characters}
