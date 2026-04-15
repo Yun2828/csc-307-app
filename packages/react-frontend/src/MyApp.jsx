@@ -5,25 +5,6 @@ import Table from "./Table";
 import Form from "./Form";
 import React, {useState, useEffect} from 'react';
 
-// const characters = [
-//   {
-//     name: "Charlie",
-//     job: "Janitor"
-//   },
-//   {
-//     name: "Mac",
-//     job: "Bouncer"
-//   },
-//   {
-//     name: "Dee",
-//     job: "Aspring actress"
-//   },
-//   {
-//     name: "Dennis",
-//     job: "Bartender"
-//   }
-// ];
-
 function MyApp() {
     // useState returns a pair (current state value, function that let you update the value)
     // empty state useState([])
@@ -36,6 +17,24 @@ function MyApp() {
     }
     function updateList(person){
         setCharacters([...characters, person]);
+    }
+    function postUser(person) {
+      const promise = fetch("Http://localhost:8000/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(person),
+    });
+
+      return promise;
+    }
+    function updateList(person) { 
+      postUser(person)
+        .then(() => setCharacters([...characters, person]))
+        .catch((error) => {
+          console.log(error);
+        })
     }
     function fetchUsers() {
       const promise = fetch("http://localhost:8000/users");
