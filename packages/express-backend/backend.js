@@ -2,11 +2,13 @@
 
 // ES Module Syntax
 import express from "express";
+import cors from "cors";
 
 // create an instance of express
 const app = express();
 const port = 8000;
 
+app.use(cors());
 app.use(express.json());
 
 const users = {
