@@ -3,6 +3,7 @@
 // ES Module Syntax
 import express from "express";
 import cors from "cors";
+import userService from "./user-services.js";
 
 // create an instance of express
 const app = express();
@@ -11,51 +12,11 @@ const port = 8000;
 app.use(cors());
 app.use(express.json());
 
-const users = {
-    users_list: [
-    {
-        id: "xyz789",
-        name: "Charlie",
-        job: "Janitor"
-    },
-    {
-        id: "abc123",
-        name: "Mac",
-        job: "Bouncer"
-    },
-    {
-        id: "ppp222",
-        name: "Mac",
-        job: "Professor"
-    },
-    {
-        id: "yat999",
-        name: "Dee",
-        job: "Aspring actress"
-    },
-    {
-        id: "zap555",
-        name: "Dennis",
-        job: "Bartender"
-    }
-]
-};
+
 app.get ("/", (req,res) => {
     res.send("Hello World!");
 }) ;
-const findUserByName = (name) => {
-    return users["users_list"].filter(
-        (user) => user["name"] === name
-    );
-};
 
-const findUsersByNameAndJob = (name, job) => {
-  return users["users_list"].filter((user) => {
-    const matchesName = name === undefined || user["name"] === name;
-    const matchesJob = job === undefined || user["job"] === job;
-    return matchesName && matchesJob;
-  });
-};
 // API endpoint
 // accept http get request
 // '/' is the root path of the server (localhost), that will map to this endpoint
@@ -64,69 +25,65 @@ app.get("/users", (req, res) => {
   const name = req.query.name;
   const job = req.query.job;
 
-  if (name !== undefined || job !== undefined) {
-    const result = findUsersByNameAndJob(name, job);
-    res.send({ users_list: result });
-  } else {
-    res.send(users);
-  }
+  userService
+  .getUsers(name, job) 
+  .then((results) => {
+    res.send({ users_list: results });
+  })
+  .catch(() => {
+    res.status(500).send("Internal server error.");
+  });
 });
-
-const findUserById = (id) =>
-  users["users_list"].find((user) => user["id"] === id);
 
 app.get("/users/:id", (req, res) => {
-  const id = req.params["id"]; //or req.params.id
-  let result = findUserById(id);
-  if (result === undefined) {
-    res.status(404).send("Resource not found.");
-  } else {
-    res.send(result);
-  }
+  const id = req.params.id;
+
+  userService
+    .findUserById(id) 
+    .then((result) => {
+      if (!result) {
+        res.status(404).send("Resource not found.");
+      } else {
+        res.send(result);
+      }
+    })
+    .catch(() => {
+      res.status(500).send("Internal server error.");
+    });
 });
 
-const generateId = () => {
-  return Math.random().toString(36).substring(2, 9);
-};
-
-const addUser = (user) => {
-  const userWithId = {
-    id: generateId(),
-    ...user,
-  };
-
-  users["users_list"].push(userWithId);
-  return userWithId;
-};
 
 app.post("/users", (req, res) => {
   const userToAdd = req.body;
-  const addedUser = addUser(userToAdd);
-  res.status(201).send(addedUser);
+
+  userService
+    .addUser(userToAdd) 
+    .then((addedUser) => {
+      res.status(201).send(addedUser);
+    })
+    .catch((error) => {
+      res.status(400).send(error.message);
+    });
 });
 
-const removeUserById = (id) => {
-  const index = users["users_list"].findIndex((user) => user["id"] === id);
-
-  if (index === -1) {
-    return undefined;
-  }
-
-  const deletedUser = users["users_list"][index];
-  users["users_list"].splice(index, 1);
-  return deletedUser;
-};
 
 app.delete("/users/:id", (req, res) => {
-  const id = req.params["id"];
-  const deletedUser = removeUserById(id);
+  const id = req.params.id;
 
-  if (deletedUser === undefined) {
-    res.status(404).send("Resource not found.");
-  } else {
-    res.status(204).send();
-  }
+  userService
+    .deleteUserById(id)
+    .then((deletedUser) => {
+      if (!deletedUser) {
+        res.status(404).send("Resource not found.");
+      } else {
+        res.status(204).send();
+      }
+    })
+    .catch(() => {
+      res.status(500).send("Internal server error.");
+    });
 });
+
 
 app.listen(port, () => {
     console.log(

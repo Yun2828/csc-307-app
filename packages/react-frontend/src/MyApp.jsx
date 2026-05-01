@@ -25,28 +25,22 @@ function MyApp() {
     });
   }
 
- function deleteUser(id) {
-  return fetch(`http://localhost:8000/users/${id}`, {
-    method: "DELETE",
-  });
-}
-
-function removeOneCharacter(id) {
-  deleteUser(id)
-    .then((res) => {
-      if (res.status === 204) {
-        const updated = characters.filter((character) => {
-          return character.id !== id;
-        });
-        setCharacters(updated);
-      } else {
-        throw new Error("User was not deleted");
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-}
+  function removeOneCharacter(id) {
+    deleteUser(id)
+      .then((res) => {
+        if (res.status === 204) {
+          const updated = characters.filter((character) => {
+            return character._id !== id; 
+          });
+          setCharacters(updated);
+        } else {
+          throw new Error("User was not deleted");
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
 
   function updateList(person) {
     postUser(person)
